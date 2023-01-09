@@ -1,0 +1,1850 @@
+--------------------------------------------------------------.aspx------------------------------------------------------------------------
+
+
+
+<%@ Page Language="C#" MasterPageFile="~/HRM/HRM.master" AutoEventWireup="true" CodeFile="SaleOrderQuantityEdit.aspx.cs"
+    Inherits="SGX_Marketing_Sales_SalesOrder_SaleOrderQuantityEdit" Title="Untitled Page" %>
+
+<%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="SGG" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+
+    <script src="../../JavaScript/num2Word.js" type="text/javascript"></script>
+
+    <script src="../../../JavaScript/Common.js" type="text/javascript"></script>
+
+    <script src="poAjax.js" type="text/javascript"></script>
+
+    <script src="../../../Jquery/json2.js" type="text/javascript"></script>
+
+    <link href="../../../css/FA_1.css" rel="stylesheet" type="text/css" />
+
+    <script src="../../../Jquery/jquery-1.4.2.min.js" type="text/javascript"></script>
+
+    <script src="../../../JavaScript/Common.js" type="text/javascript"></script>
+
+    <script src="http://jquery-json.googlecode.com/files/jquery.json-2.2.min.js" type="text/javascript"></script>
+    
+    
+   
+    
+    
+    <script type="text/javascript">
+        $(document).ready(function(){       
+           CheckTotal();
+            function CheckTotal() {
+                var totalPOQty=0;
+                var totalDispQty=0;
+                var totalBalanceQty=0;
+                var totalIncreaseQty=0;
+              
+                var id='';
+                $("#<%=GVProductDtls.ClientID %> input[id$='txtIncreaseQty']").each(function() {
+                
+                    id=$(this).closest("tr").find("[id*='txtIncreaseQty']").attr('id');
+                    //alert(id);
+                    var incQty = $(this).closest("tr").find("[id*='txtIncreaseQty']").val();
+                    if (isNaN(incQty) || incQty == '') {
+                        incQty = 0;
+                    }                    
+                    var poQty = $(this).closest("tr").find("span[id*='lblPOQty']").text();
+                    if (isNaN(poQty) || poQty == '') {
+                        poQty = 0;
+                    }
+                    var dispatchQty = $(this).closest("tr").find("span[id*='lblDispatchQty']").text();
+                    if (isNaN(dispatchQty) || dispatchQty == '') {
+                        dispatchQty = 0;
+                    }
+                    var balanceQty = $(this).closest("tr").find("span[id*='lblBalanceQty']").text();
+                    if (isNaN(balanceQty) || balanceQty == '') {
+                        balanceQty = 0;
+                    }
+                    totalIncreaseQty += parseFloat(incQty);
+                    totalPOQty += parseFloat(poQty);
+                    totalDispQty += parseFloat(dispatchQty);
+                    totalBalanceQty += parseFloat(balanceQty);
+                });
+                
+                $("#<%=lblFtTotalPOQty.ClientID%>").text(totalPOQty.toFixed(2));
+                $("#<%=lblFtTotalDispatchQty.ClientID%>").text(totalDispQty.toFixed(2));
+                $("#<%=lblFtTotalBalanceQty.ClientID%>").text(totalBalanceQty.toFixed(2));
+                $("#<%=lblFtTotalIncreaseQty.ClientID%>").text(totalIncreaseQty.toFixed(2));              
+            }
+            
+             $("#<%=GVProductDtls.ClientID %> input[id$='txtIncreaseQty']:text").blur(CheckTotal);
+    });
+
+    </script>
+
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+
+    
+
+    <script type="text/jscript">
+           function CheckDatesMinLessMax(source, arg) {
+                var day, month, year;
+     
+                var fromdate = document.getElementById('<%=hdnPOExpiryDate.ClientID %>');
+                var todate = document.getElementById('<%=txtPOExpiryDate.ClientID %>');               
+            
+                day = fromdate.value.split("/")[0];
+                month = fromdate.value.split("/")[1];
+                year = fromdate.value.split("/")[2];
+                var fromdate1 = month + '/' + day + '/' + year;
+                day = todate.value.split("/")[0];
+                month = todate.value.split("/")[1];
+                year = todate.value.split("/")[2];
+                var todate1 = month + '/' + day + '/' + year;
+                var myDate1 = new Date(fromdate1);
+
+                var myDate2 = new Date(todate1);
+                if (myDate1 <= myDate2){
+                arg.IsValid = true;
+                var dt = new Date();
+                var day1 = dt.getDate();
+                var month1 = dt.getMonth();
+                var year1 = dt.getFullYear();
+                var dt = new Date(year1, month1, day1);
+                var _Predt = new Date(year1, month1, day1);te
+              
+                
+                sender._selectedDate = new Date(_Predt);
+                    }                    
+                else{
+                    arg.IsValid = false; 
+                    }
+            } 
+           
+        </script>
+
+    <table class="Panel" style="width: 100%;">
+        <tr>
+            <td style="padding-top: 3px" align="center" colspan="6">
+                <asp:Label ID="lblvendormaster" runat="server" ForeColor="Black" Text="Customer PO Quantity Increase"
+                    CssClass="Label2"></asp:Label>
+           </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <asp:Panel ID="ErrorContainer" runat="server" CssClass="EmptyError">
+                    <asp:Label ID="MyMessage" runat="server" Font-Size="10pt"></asp:Label>
+                </asp:Panel>
+            </td>
+        </tr>
+        <tr>
+            <td class="Left" style="width: 10%">
+                Location
+            </td>
+            <td class="Left" style="width: 15%">
+                <asp:DropDownList ID="DDLocation" runat="server" CssClass="ddlNormal" AutoPostBack="true"
+                    OnSelectedIndexChanged="DDLocation_SelectedIndexChanged">
+                </asp:DropDownList>
+                <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ControlToValidate="DDLocation"
+                    InitialValue="0" ErrorMessage="Select Location." ValidationGroup="vin" ToolTip="Select Location."> *</asp:RequiredFieldValidator>
+            </td>
+            <td class="Left" style="width: 15%">
+                Customer Name
+            </td>
+            <td class="Left" style="width: 20%">
+                <asp:DropDownList ID="ddlcustomername" runat="server" CssClass="ddlNormal" AutoPostBack="true"
+                    OnSelectedIndexChanged="ddlcustomername_SelectedIndexChanged">
+                    <asp:ListItem Text="Select Customer Name" Value="0"></asp:ListItem>
+                </asp:DropDownList>
+            </td>
+            <td class="Left">
+                Request For
+            </td>
+            <td class="Left" style="width: 20%">
+            
+                <asp:DropDownList ID="ddlRequestFor" runat="server" CssClass="ddlNormal" 
+                    AutoPostBack="True" onselectedindexchanged="ddlRequestFor_SelectedIndexChanged">
+                    <asp:ListItem Text="Select Request For" Value="0" Selected="True"></asp:ListItem>
+                    <asp:ListItem Text="PO Expiry Date" Value="1"></asp:ListItem>    
+                    <asp:ListItem Text="PO Quantity Increase" Value="2"></asp:ListItem>
+                </asp:DropDownList>
+                
+                 <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ControlToValidate="ddlRequestFor"
+                    InitialValue="0" ErrorMessage="Select Location." ValidationGroup="vin" ToolTip="Select PO No."> *</asp:RequiredFieldValidator>
+            </td>
+        </tr>
+        <tr>
+            <td class="Left" style="width: 15%">
+                Customer PO No
+            </td>
+            
+            <!--   -->
+            <td class="Left" style="width: 15%">
+                <asp:DropDownList ID="ddlPONo" runat="server" CssClass="ddlNormal">
+                    <asp:ListItem Text="Select PO No" Value="0"></asp:ListItem>
+                </asp:DropDownList>
+                <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="ddlPONo"
+                    InitialValue="0" ErrorMessage="Select PO Number." ValidationGroup="vin" ToolTip="Select PO No."> *</asp:RequiredFieldValidator>
+            
+            </td>
+            <td style="width: 10%">
+                <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="Submit" OnClick="btnSearch_Click" />
+            </td>
+        </tr>
+    </table>
+    <table id="tblEntry" runat="server" class="Panel" style="width: 100%;">
+        <tr>
+            <td style="padding-top: 3px" align="center" colspan="6">
+                <asp:Label ID="Label1" runat="server" ForeColor="Black"  Text="Customer Purchase Order Detail"
+                  style="textalign:center"  CssClass="Label2"></asp:Label>
+            </td>
+        </tr>
+        <tr>
+            <td class="Left" style="width: 15%">
+                PO Date
+            </td>
+            <td class="Left" style="width: 15%">
+                <asp:Label ID="lblPODate" runat="server"></asp:Label>
+            </td>
+            <td class="Left" style="width: 15%">
+                PO Expiry Date
+            </td>
+            <td class="Left" style="width: 15%">
+                <asp:Label ID="lblPOExpiryDate" runat="server"></asp:Label>
+            </td>
+            <td class="Left" style="width: 15%">
+               <asp:Label ID="lblnew_expiry_date" Text="New PO Expiry Date" runat="server"></asp:Label> 
+            </td>
+            <td class="Left">
+                <asp:TextBox ID="txtPOExpiryDate" runat="server" CssClass="txtDate" MaxLength="10"></asp:TextBox>
+              
+                    <SGG:MaskedEditExtender ID="txtFDate_MaskedEditExtender" runat="server" Enabled="True"
+                        Mask="99/99/9999" MaskType="Date" TargetControlID="txtPOExpiryDate">
+                    </SGG:MaskedEditExtender>
+                    <SGG:CalendarExtender ID="txtFDate_CalendarExtender" runat="server" Enabled="True"
+                        Format="dd/MM/yyyy" TargetControlID="txtPOExpiryDate" >
+                    </SGG:CalendarExtender>
+                    <asp:RegularExpressionValidator ID="RegularExpressionValidator4" runat="server" ControlToValidate="txtPOExpiryDate"
+                        ErrorMessage="*" SetFocusOnError="True" ToolTip="Enter From Date in (DD/MM/YYYY) Format."
+                        ValidationExpression="^(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\d\d$"
+                        ValidationGroup="Vin" Display="Dynamic"></asp:RegularExpressionValidator>
+                        
+                        <asp:CustomValidator ID="CustomValidator1" runat="server"
+                        ToolTip="To date is not less than from date." ClientValidationFunction="CheckDatesMinLessMax" 
+                        Display="Static" ValidationGroup="Vin" SetFocusOnError="True" 
+                        ControlToValidate="txtPOExpiryDate">*</asp:CustomValidator>   
+             </td>
+         </tr>
+          <tr>
+                <td align="left" style="overflow: auto" colspan="6">
+                <asp:GridView ID="GVProductDtls" runat="server" AutoGenerateColumns="False" EmptyDataText="Record Not Found"
+                    EmptyDataRowStyle-CssClass="GridEmpty" Width="100%" CssClass="grid-view" ShowFooter="false">
+                    <HeaderStyle CssClass="" />
+                    <RowStyle CssClass="normal" />
+                    <FooterStyle CssClass="GVfooter" />
+                    <AlternatingRowStyle CssClass="alternate" />
+                    <EmptyDataRowStyle CssClass="GridEmpty" />
+                    <HeaderStyle HorizontalAlign="Center" VerticalAlign="Top" />
+                    <Columns>
+                        <asp:TemplateField HeaderText="Sr.No">
+                            <ItemTemplate>
+                                <asp:Label ID="lblsr" runat="server" Text='<%# Eval("ProdSl_no") %>'></asp:Label>
+                            </ItemTemplate>
+                            <ItemStyle Width="5%" HorizontalAlign="Center" />
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Product Desc.">
+                            <ItemTemplate>
+                                <asp:Label ID="lblProductDesc" runat="server" Text='<%# Eval("ProductDesc") %>'></asp:Label>
+                                <asp:HiddenField ID="hdnSo_No" runat="server" Value='<%# Eval("So_No") %>'></asp:HiddenField>
+                                <asp:HiddenField ID="hdnProductType_Code" runat="server" Value='<%# Eval("ProductType_Code") %>'>
+                                </asp:HiddenField>
+                                <asp:HiddenField ID="hdnProductGrade_Code" runat="server" Value='<%# Eval("ProductGrade_Code") %>'>
+                                </asp:HiddenField>
+                                <asp:HiddenField ID="hdnProductSize_Code" runat="server" Value='<%# Eval("ProductSize_Code") %>'>
+                                </asp:HiddenField>
+                            </ItemTemplate>
+                            <ItemStyle Width="30%" HorizontalAlign="Left" />
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Rate/MT">
+                            <ItemTemplate>
+                                <asp:Label ID="lblRatePerTon" runat="server" Text='<%# Eval("RatePerTon") %>'></asp:Label>
+                            </ItemTemplate>
+                            <ItemStyle Width="5%" HorizontalAlign="Center" />
+                            <FooterStyle Width="5%" HorizontalAlign="Center" />
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="PO Qty (MT)">
+                            <ItemTemplate>
+                                <asp:Label ID="lblPOQty" runat="server" Text='<%# Eval("TotalQty") %>'></asp:Label>
+                            </ItemTemplate>
+                            <ItemStyle Width="15%" HorizontalAlign="Center" />
+                            <FooterStyle Width="15%" HorizontalAlign="Center" />
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Dispatched Qty (MT)">
+                            <ItemTemplate>
+                                <asp:Label ID="lblDispatchQty" runat="server" Text='<%# Eval("DispatchQty") %>'></asp:Label>
+                            </ItemTemplate>
+                            <ItemStyle Width="15%" HorizontalAlign="Center" />
+                            <FooterStyle Width="15%" HorizontalAlign="Center" />
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Balance Qty (MT)">
+                            <ItemTemplate>
+                                <asp:Label ID="lblBalanceQty" runat="server" Text='<%# Eval("RemainingQty") %>'></asp:Label>
+                            </ItemTemplate>
+                            <ItemStyle Width="15%" HorizontalAlign="Center" />
+                            <FooterStyle Width="15%" HorizontalAlign="Center" />
+                        </asp:TemplateField>
+                        <asp:TemplateField HeaderText="Increase Qty (MT)">
+                            <ItemTemplate>
+                                <asp:TextBox ID="txtIncreaseQty" runat="server" CssClass="txtNormal" MaxLength="10"
+                                    AutoComplete="Off"></asp:TextBox>
+                                <SGG:FilteredTextBoxExtender ID="ftetxtIncreaseQty" runat="server" FilterType="Custom, Numbers"
+                                    ValidChars="." FilterMode="ValidChars" TargetControlID="txtIncreaseQty">
+                                </SGG:FilteredTextBoxExtender>
+                            </ItemTemplate>
+                            <FooterTemplate>
+                                <asp:Label ID="lblFtTotalIncreaseQty" runat="server" Text="0" AutoComplete="Off"
+                                    Maxlength="10"></asp:Label>
+                            </FooterTemplate>
+                            <ItemStyle Width="15%" HorizontalAlign="Center" />
+                            <FooterStyle Width="15%" HorizontalAlign="Center" />
+                        </asp:TemplateField>
+                    </Columns>
+                </asp:GridView>
+            </td>
+        </tr>
+        <tr style="border: 1px solid #666666; background-color: #CCCCCC">
+            <td colspan="6" style="width: 100%;">
+                <table style="width: 100%;" border="1">
+                    <tr>
+                        <td class="Left" style="width: 40%; text-align: right" colspan="4">
+                            Total
+                        </td>
+                        <td class="Left" style="width: 15%; text-align: center">
+                            <asp:Label ID="lblFtTotalPOQty" runat="server" Text="0"></asp:Label>
+                        </td>
+                        <td class="Left" style="width: 15%; text-align: center">
+                            <asp:Label ID="lblFtTotalDispatchQty" runat="server" Text="0"></asp:Label>
+                        </td>
+                        <td class="Left" style="width: 15%; text-align: center">
+                            <asp:Label ID="lblFtTotalBalanceQty" runat="server" Text="0"></asp:Label>
+                        </td>
+                        <td class="Left" style="width: 15%; text-align: center">
+                            <asp:Label ID="lblFtTotalIncreaseQty" runat="server" Text="0"></asp:Label>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td class="Left" style="width: 20%">
+                Reason For Increase (If Any)
+            </td>
+            <td colspan="6" style="text-align: left" align="left">
+                <asp:TextBox ID="txtReason" runat="server" TextMode="MultiLine" CssClass="txtNormal"
+                    MaxLength="250" Height="80px" Style="width: 99%; resize:none;"></asp:TextBox>
+          <!-- --> 
+                <asp:RequiredFieldValidator ID="RequiredFieldValidator4" ValidationGroup="Vin" runat="server" ShowMessageBox="true" ErrorMessage="Please give a reason for increase." 
+                ControlToValidate="txtReason">*</asp:RequiredFieldValidator>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6" align="center">
+                <asp:Button Text="Save" runat="server" ID="btnSave" CssClass="Submit" OnClick="btnSave_Click" ValidationGroup="Vin"/>
+                <asp:HiddenField ID="hdnPOExpiryDate" runat="server" />
+           
+                <asp:ValidationSummary ID="ValidationSummary1" runat="server" ValidationGroup="Vin" ShowMessageBox="true" ShowSummary="false" />
+                <asp:Button Text="Cancel" ID="btnCancel" runat="server" CssClass="Submit" OnClick="btnCancel_Click" />
+                
+                
+            </td>
+        </tr>
+    </table>
+</asp:Content>
+
+
+
+-----------------------------------------------------------------.aspx.cs -------------------------------------------------------------------------
+
+
+
+using System;
+using System.Collections;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+
+public partial class SGX_Marketing_Sales_SalesOrder_SaleOrderQuantityEdit : System.Web.UI.Page
+{
+    BALSGX_CustomerPOEntry CustomerPOEntry = new BALSGX_CustomerPOEntry();
+    Message msg = new Message();
+    BALSGX_SelectCommonMaster CommonMaster = new BALSGX_SelectCommonMaster();
+
+    void Page_PreRender(object obj, EventArgs e)
+    {
+        ViewState["update"] = Session["update"];
+    }
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        ddlcustomername.Enabled = true;
+        if (!IsPostBack)
+        {
+            Label MyMessage = (Label)this.Master.FindControl("MyMessage");
+            MyMessage.Text = "Customer Purchase Order Entry";
+            LinkButton MainURL = (LinkButton)this.Master.FindControl("MainURL");
+            MainURL.Text = Session["URLText"].ToString();
+            MainURL.PostBackUrl = Session["URLName"].ToString();
+            Label lblArrow = (Label)this.Master.FindControl("lblArrow");
+            lblArrow.Visible = true;
+            Fill_Location();
+
+            tblEntry.Visible = false;
+            
+            lblnew_expiry_date.Visible = false;
+            txtPOExpiryDate.Visible = false;
+            Session["update"] = Server.UrlEncode(System.DateTime.Now.ToString());
+          
+        }
+    }
+
+    private void Fill_Location()
+    {
+        DataTable dtLocation = CommonMaster.SelectLocation("Select Product", "Select Location", Session["Employee_Code"].ToString());
+        DDLocation.DataSource = dtLocation;
+        DDLocation.DataTextField = "locationName";
+        DDLocation.DataValueField = "locationCode";
+        DDLocation.DataBind();
+        DDLocation.Items.Insert(0, new ListItem("Select", "0"));
+    }
+
+
+    private void custname(string loc)
+    {
+        DataTable dt = CommonMaster.Fill_Customer(DDLocation.SelectedValue, Session["Employee_Code"].ToString());
+        if (dt.Rows.Count > 0)
+        {
+            ErrorContainer.Visible = false;
+            ddlcustomername.DataSource = dt;
+            ddlcustomername.DataTextField = "custName";
+            ddlcustomername.DataValueField = "custCode";
+            ddlcustomername.DataBind();
+            ddlcustomername.Items.Insert(0, new ListItem("Select Customer", "0"));
+        }
+        else
+        {
+            ddlcustomername.Items.Insert(0, new ListItem("Select Customer", "0"));
+            ErrorContainer.Visible = true;
+            msg.ShowMessage("Customer not Available at " + DDLocation.SelectedItem.Text, null, ErrorContainer, MyMessage, "Warning");
+            return;
+        }
+
+        
+    }
+    protected void ddlcustomername_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        ErrorContainer.Visible = false;
+       
+    }
+    protected void DDLocation_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        custname(DDLocation.SelectedValue);
+        tblEntry.Visible = false;
+    }
+    protected void btnSearch_Click(object sender, EventArgs e)
+    {
+        ErrorContainer.Visible = false;
+        DataTable dt = CustomerPOEntry.GETPONo_Product_Detail(Convert.ToString(ddlPONo.SelectedValue));
+        txtReason.Text = "";
+        
+            ddlcustomername.Enabled = false;
+        
+        
+        if (dt.Rows.Count > 0)
+         {
+             tblEntry.Visible = true;
+             
+             lblPODate.Text = Convert.ToString(dt.Rows[0]["CustPODate"].ToString());
+             lblPOExpiryDate.Text = Convert.ToString(dt.Rows[0]["CustPOExpDate"].ToString());
+
+             hdnPOExpiryDate.Value = Convert.ToString(dt.Rows[0]["CustPOExpDate"].ToString());
+             GVProductDtls.DataSource = dt;
+             GVProductDtls.DataBind();
+         }
+         else
+         {
+             tblEntry.Visible = false;
+             lblPODate.Text = "";
+             lblPOExpiryDate.Text = "";
+             GVProductDtls.DataSource = null;
+             GVProductDtls.DataBind();
+             ErrorContainer.Visible = true;
+             msg.ShowMessage("PO product details not Available for " + ddlcustomername.SelectedItem.Text, null, ErrorContainer, MyMessage, "Warning");
+         }
+       
+         //if (dt.Rows.Count == 1)
+         if (Convert.ToInt32(ddlRequestFor.SelectedValue) == 1) 
+        {
+             lblnew_expiry_date.Visible = true;
+             txtPOExpiryDate.Visible = true;           
+         }
+         else {
+             lblnew_expiry_date.Visible = false;
+             txtPOExpiryDate.Visible = false;
+         }
+      
+    }
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+        ErrorContainer.Visible = true;
+        decimal result = 0;
+
+        DataTable dtProductDtl = new DataTable();
+        dtProductDtl.Columns.Add("So_No", typeof(string));
+        dtProductDtl.Columns.Add("ProdSl_no", typeof(int));
+        dtProductDtl.Columns.Add("ProductType_Code", typeof(int));
+        dtProductDtl.Columns.Add("ProductGrade_Code", typeof(int));
+        dtProductDtl.Columns.Add("ProductSize_Code", typeof(int));
+        dtProductDtl.Columns.Add("IncreaseQty", typeof(decimal));
+        dtProductDtl.Columns.Add("PreviousQty", typeof(decimal));
+
+     
+        DataRow dr = null;
+        for (int i = 0; i < GVProductDtls.Rows.Count; i++)
+        {
+            dr = dtProductDtl.NewRow();
+            Label lblsr = (Label)GVProductDtls.Rows[i].FindControl("lblsr");
+            HiddenField hdnSo_No = (HiddenField)GVProductDtls.Rows[i].FindControl("hdnSo_No");
+            HiddenField hdnProductType_Code = (HiddenField)GVProductDtls.Rows[i].FindControl("hdnProductType_Code");
+            HiddenField hdnProductGrade_Code = (HiddenField)GVProductDtls.Rows[i].FindControl("hdnProductGrade_Code");
+            HiddenField hdnProductSize_Code = (HiddenField)GVProductDtls.Rows[i].FindControl("hdnProductSize_Code");
+            TextBox txtIncreaseQty = (TextBox)GVProductDtls.Rows[i].FindControl("txtIncreaseQty");
+            Label lblPOQty = (Label)GVProductDtls.Rows[i].FindControl("lblPOQty");
+
+            if (txtIncreaseQty.Text == "") txtIncreaseQty.Text = "0";
+            if (Convert.ToInt32(txtIncreaseQty.Text)>0)
+            {
+                dr["So_No"] = Convert.ToString(hdnSo_No.Value);
+                dr["ProdSl_no"] = Convert.ToInt32(lblsr.Text);
+                dr["ProductType_Code"] = Convert.ToInt32(hdnProductType_Code.Value);
+                dr["ProductGrade_Code"] = Convert.ToInt32(hdnProductGrade_Code.Value);
+                dr["ProductSize_Code"] = Convert.ToInt32(hdnProductSize_Code.Value);
+                dr["IncreaseQty"] = Convert.ToDecimal(txtIncreaseQty.Text);
+                dr["PreviousQty"] = Convert.ToDecimal(lblPOQty.Text);
+                dtProductDtl.Rows.Add(dr);
+            }
+        }
+        if (Session["update"].ToString() == ViewState["update"].ToString())
+        {
+     
+
+     /*--------------------------------------------------------------------*/
+
+            if (Convert.ToInt32(ddlRequestFor.SelectedValue) == 1)
+            {
+                result = CustomerPOEntry.Update_PO_ExpiryDate(Convert.ToString(ddlPONo.SelectedValue), Convert.ToString(txtReason.Text), Convert.ToString(Session["LogIn_Code"].ToString()), Convert.ToString(lblPOExpiryDate.Text), Convert.ToString(txtPOExpiryDate.Text), Convert.ToInt32(ddlRequestFor.SelectedValue));
+          
+                if (result > 0)
+                {
+                    msg.ShowMessage("Customer Purchase Order Quantity For PO No : " + ddlPONo.SelectedItem.Text + " Updated Successfuly.", null, ErrorContainer, MyMessage, "Success");
+                    Session["update"] = Server.UrlEncode(System.DateTime.Now.ToString());
+                    Reset();
+                }
+                else
+                {
+                    msg.ShowMessage("Customer Purchase Order Quantity Updation Failed : Try Again!", null, ErrorContainer, MyMessage, "Warning");
+                }
+            }
+       
+     /*---------------------------------------------------------------------*/
+
+
+            if (dtProductDtl != null && Convert.ToInt32(ddlRequestFor.SelectedValue)==2)
+            {
+                if (dtProductDtl.Rows.Count > 0)
+                {
+                    result = CustomerPOEntry.Update_POProduct_Quantity(dtProductDtl, Convert.ToString(ddlPONo.SelectedValue), Convert.ToString(txtReason.Text), Convert.ToString(Session["LogIn_Code"].ToString()));                    
+                    if (result > 0)
+                    {
+                        msg.ShowMessage("Customer Purchase Order Quantity For PO No : " +ddlPONo.SelectedItem.Text+" Updated Successfuly.", null, ErrorContainer, MyMessage, "Success");
+                        Session["update"] = Server.UrlEncode(System.DateTime.Now.ToString());
+                        Reset();
+                    }
+                    else
+                    {
+                        msg.ShowMessage("Customer Purchase Order Quantity Updation Failed : Try Again!", null, ErrorContainer, MyMessage, "Warning");
+                    }
+                }
+                else
+                {
+                    msg.ShowMessage("Please Update Atleast One Product Quantity Greater Than Zero From Purchase Order.", null, ErrorContainer, MyMessage, "Warning");
+                }
+            }
+            else
+            {
+                msg.ShowMessage("Please Update Atleast One Product Quantity Greater Than Zero From Purchase Order.", null, ErrorContainer, MyMessage, "Warning");
+            }
+        }
+        else
+        {
+            msg.ShowMessage("Page Reload Not Allowed. !!", null, ErrorContainer, MyMessage, null);
+        }
+    }
+   
+
+    public void Reset()
+    {
+        DDLocation.SelectedValue = "0";
+        ddlcustomername.SelectedValue = "0";
+        ddlPONo.SelectedValue = "0";
+        txtReason.Text = "";
+        GVProductDtls.DataSource = null;
+        GVProductDtls.DataBind();
+        tblEntry.Visible = false;
+        ddlPONo.Items.Clear();
+    }
+
+    protected void btnCancel_Click(object sender, EventArgs e)
+    {
+
+        Reset();
+        tblEntry.Visible = false;
+        ErrorContainer.Visible = false;
+    }
+    protected void ddlRequestFor_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        DataTable dt = CustomerPOEntry.GETPONo_LIST(DDLocation.SelectedValue, Convert.ToString(ddlcustomername.SelectedValue), Convert.ToInt32(ddlRequestFor.SelectedValue));
+        if (dt.Rows.Count > 0)
+        {
+            ddlPONo.Items.Clear();
+            ErrorContainer.Visible = false;
+            ddlPONo.DataSource = dt;
+            ddlPONo.DataTextField = "CustPO_NO";
+            ddlPONo.DataValueField = "SO_NO";
+            ddlPONo.DataBind();
+            ddlPONo.Items.Insert(0, new ListItem("Select Customer PO No", "0"));
+            tblEntry.Visible = false;
+        }
+        else
+        {
+            ddlPONo.Items.Clear();
+            ddlPONo.Items.Insert(0, new ListItem("Select Customer PO No", "0"));
+            ErrorContainer.Visible = true;
+           
+            msg.ShowMessage("PO not Available for  " + ddlcustomername.SelectedItem.Text, null, ErrorContainer, MyMessage, "Warning");
+            return;
+        }
+    }
+}
+
+
+
+------------------------------------------------------------------------DALSGX_Customer_PO_Entry.cs---------------------------------------------------------------------
+
+
+using System;
+using System.Data;
+using System.Configuration;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+using System.Data.SqlClient;
+using System.Data.SqlTypes;
+
+public class DALSGX_CustomerPOEntry
+{
+    string connStr = ConfigurationManager.ConnectionStrings["DBConnSGX"].ToString();
+    SqlTransaction mytrans = null;
+
+    public DALSGX_CustomerPOEntry()
+    {
+       
+    }
+
+ public string Insert_SaleOrderEntry(string custCode, string CustPO_No, string CustPODate,string CustPOExpDate, string POReceiptDt, string CustVATNo, string CustCSTNo, string Location,
+                string Dispatch_LocCode, double AdvPer, double AdvAmt, string Paymode, int CreditDay, string Expdate, string TransportBy, string AdvanceReceiptNo, string JSStatus,
+                string JSRefNo, string FormType, double PO_Qty , double SubTotal, double VATCSTValue, double Freight_Cost, double DiscountPrice,
+                double POValue, string AmtlnWord, string Product_Code, string Remark,
+                string BillingAddress, string DeliveryAddress, int BillingAddress_state, int DeliveryAddress_state, string DeliveryAddress_GSTIN, 
+                string TermCond, DataTable dtAttachCopy, string AddBy,string PORecMode,
+                DataTable dtProductDtl, DataTable dtSpecification, DataTable dtTradeDis, decimal DeliveryDist)
+    {
+
+        SqlConnection conn = new SqlConnection(connStr);
+        conn.Open();
+        mytrans = conn.BeginTransaction();
+        SqlCommand dCmd1 = null;
+        System.Data.SqlTypes.SqlBinary attached;
+        attached = SqlBinary.Null;
+        System.Data.SqlTypes.SqlDateTime _time;
+        _time = SqlDateTime.Null;
+        System.Data.SqlTypes.SqlString _str;
+        _str = SqlString.Null;
+        System.Data.SqlTypes.SqlInt32 _int;
+        _int = SqlInt32.Null;
+        try
+        {
+            string SO_Code;
+            dCmd1 = new SqlCommand("usp_InsertCustPO_Entry", conn);
+            dCmd1.CommandType = CommandType.StoredProcedure;
+            dCmd1.Transaction = mytrans;
+            SqlParameter sqlp = new SqlParameter();
+            sqlp = dCmd1.Parameters.Add("@So_No", SqlDbType.VarChar, 25);
+            sqlp.Direction = ParameterDirection.Output;
+
+            dCmd1.Parameters.AddWithValue("@custCode", custCode);
+            dCmd1.Parameters.AddWithValue("@CustPO_No", CustPO_No);
+            dCmd1.Parameters.AddWithValue("@CustPODate", CustPODate);
+            dCmd1.Parameters.AddWithValue("@CustPOExpDate", CustPOExpDate);
+            dCmd1.Parameters.AddWithValue("@POReceiptDt", POReceiptDt);
+            dCmd1.Parameters.AddWithValue("@CustVATNo", CustVATNo);
+            dCmd1.Parameters.AddWithValue("@CustCSTNo", CustCSTNo);
+            dCmd1.Parameters.AddWithValue("@Location", Location);
+            dCmd1.Parameters.AddWithValue("@Dispatch_LocCode", Dispatch_LocCode);
+
+            dCmd1.Parameters.AddWithValue("@AdvPer", AdvPer);
+            dCmd1.Parameters.AddWithValue("@AdvAmt", AdvAmt);
+
+            dCmd1.Parameters.AddWithValue("@Paymode", Paymode);
+
+            dCmd1.Parameters.AddWithValue("@CreditDay", CreditDay);
+
+            if (Expdate != "")
+            {
+                dCmd1.Parameters.AddWithValue("@Expdate", Expdate);
+            }
+            else { dCmd1.Parameters.AddWithValue("@Expdate", _time); }
+
+            dCmd1.Parameters.AddWithValue("@TransportBy", TransportBy);
+
+            dCmd1.Parameters.AddWithValue("@AdvanceReceiptNo", _str);
+
+            dCmd1.Parameters.AddWithValue("@JSStatus", JSStatus);
+            if (JSRefNo != "")
+            {
+                dCmd1.Parameters.AddWithValue("@JSRefNo", JSRefNo);
+            }
+            else
+            {
+                dCmd1.Parameters.AddWithValue("@JSRefNo", _str);
+            }
+            dCmd1.Parameters.AddWithValue("@FormType", FormType);
+            dCmd1.Parameters.AddWithValue("@PO_Qty", PO_Qty);
+            dCmd1.Parameters.AddWithValue("@SubTotal", SubTotal);
+            dCmd1.Parameters.AddWithValue("@VATCSTValue", VATCSTValue);
+            dCmd1.Parameters.AddWithValue("@Freight_Cost", Freight_Cost);
+            dCmd1.Parameters.AddWithValue("@DiscountPrice", DiscountPrice);            
+            dCmd1.Parameters.AddWithValue("@POValue", POValue);
+            dCmd1.Parameters.AddWithValue("@AmtlnWord", AmtlnWord);
+            dCmd1.Parameters.AddWithValue("@Product_Code", Product_Code);
+            dCmd1.Parameters.AddWithValue("@Remark", Remark);
+            dCmd1.Parameters.AddWithValue("@BillingAddress", BillingAddress);
+            dCmd1.Parameters.AddWithValue("@BillingAddress_State", BillingAddress_state);
+            dCmd1.Parameters.AddWithValue("@DeliveryAddress", DeliveryAddress);
+            dCmd1.Parameters.AddWithValue("@DeliveryAddress_State", DeliveryAddress_state);
+            dCmd1.Parameters.AddWithValue("@DeliveryAddress_GSTIN", DeliveryAddress_GSTIN);
+            dCmd1.Parameters.AddWithValue("@TermCond", TermCond);
+            dCmd1.Parameters.AddWithValue("@AddBy", AddBy);
+            dCmd1.Parameters.AddWithValue("@PORecMode", PORecMode);
+            if (DeliveryDist > 0)
+            {
+                dCmd1.Parameters.AddWithValue("@DeliveryDist", DeliveryDist);
+            }
+            else
+            {
+                dCmd1.Parameters.AddWithValue("@DeliveryDist", DBNull.Value);
+            }
+            
+            dCmd1.ExecuteNonQuery();
+            SO_Code = (string)dCmd1.Parameters["@So_No"].Value;
+
+            if (dtAttachCopy.Rows.Count > 0 && SO_Code != null)
+            {
+                for (int i = 0; i < dtAttachCopy.Rows.Count; i++)
+                {
+                    dCmd1 = new SqlCommand("usp_InsertPO_Attach_details", conn);
+                    dCmd1.CommandType = CommandType.StoredProcedure;
+                    dCmd1.Transaction = mytrans;
+                    dCmd1.Parameters.AddWithValue("@So_No", SO_Code);
+                    dCmd1.Parameters.AddWithValue("@AttachPOCopy", dtAttachCopy.Rows[i]["AttachPOCopy"]);
+                    dCmd1.ExecuteNonQuery();
+                }
+            }
+
+            for (int i = 0; i < dtProductDtl.Rows.Count; i++)
+            {
+                dCmd1 = new SqlCommand("usp_InsertCustPO_ProdDtl", conn);
+                dCmd1.CommandType = CommandType.StoredProcedure;
+                dCmd1.Transaction = mytrans;
+                dCmd1.Parameters.AddWithValue("@So_No", SO_Code);
+                dCmd1.Parameters.AddWithValue("@ProdSl_no", dtProductDtl.Rows[i]["ProdSl_no"]);
+                dCmd1.Parameters.AddWithValue("@ProductType_Code", dtProductDtl.Rows[i]["ProductType_Code"]);
+                dCmd1.Parameters.AddWithValue("@ProductGrade_Code", dtProductDtl.Rows[i]["ProductGrade_Code"]);
+                if (dtProductDtl.Rows[i]["ProductSize_Code"].ToString() != "0")
+                {
+                    dCmd1.Parameters.AddWithValue("@ProductSize_Code", dtProductDtl.Rows[i]["ProductSize_Code"]);
+                }
+                else
+                {
+                    dCmd1.Parameters.AddWithValue("@ProductSize_Code", _int);
+                }
+                dCmd1.Parameters.AddWithValue("@Qty", dtProductDtl.Rows[i]["Qty"]);
+                dCmd1.Parameters.AddWithValue("@RatePerTon", dtProductDtl.Rows[i]["RatePerTon"]);
+                dCmd1.Parameters.AddWithValue("@TotalVal", dtProductDtl.Rows[i]["TotalVal"]);
+                dCmd1.Parameters.AddWithValue("@VATCSTPer", dtProductDtl.Rows[i]["VATCSTPer"]);
+                dCmd1.Parameters.AddWithValue("@CGSTPer", dtProductDtl.Rows[i]["CGSTPer"]);
+                dCmd1.Parameters.AddWithValue("@SGSTPer", dtProductDtl.Rows[i]["SGSTPer"]);
+                dCmd1.Parameters.AddWithValue("@VATCSTValue", dtProductDtl.Rows[i]["VATCSTValue"]);
+                dCmd1.Parameters.AddWithValue("@Freight_Cost", dtProductDtl.Rows[i]["Freight_Cost"]);
+                dCmd1.Parameters.AddWithValue("@OverallValue", dtProductDtl.Rows[i]["OverallValue"]);
+                dCmd1.Parameters.AddWithValue("@DiscountPrice", dtProductDtl.Rows[i]["DiscountPrice"]);
+                dCmd1.Parameters.AddWithValue("@DiscountQty", dtProductDtl.Rows[i]["DiscountQty"]);
+
+                dCmd1.Parameters.AddWithValue("@Base_Rate", dtProductDtl.Rows[i]["Base_Rate"]);
+                dCmd1.Parameters.AddWithValue("@Royalty", dtProductDtl.Rows[i]["Royalty"]);
+                dCmd1.Parameters.AddWithValue("@Logistic_Cost", dtProductDtl.Rows[i]["Logistic_Cost"]);
+                dCmd1.Parameters.AddWithValue("@Other", dtProductDtl.Rows[i]["Others"]);
+                dCmd1.Parameters.AddWithValue("@Trade_Disc", dtProductDtl.Rows[i]["Trade_Disc"]);
+
+
+                dCmd1.ExecuteNonQuery();
+            }
+
+            //Add By :Ashok 04-06-2014
+            for (int i = 0; i < dtTradeDis.Rows.Count; i++)
+            {
+                if (Convert.ToDouble(dtTradeDis.Rows[i]["TradeDis"]) > 0)
+                {
+                    dCmd1 = new SqlCommand("usp_InsertCPO_TDIS", conn);
+                    dCmd1.CommandType = CommandType.StoredProcedure;
+                    dCmd1.Transaction = mytrans;
+                    dCmd1.Parameters.AddWithValue("@So_No", SO_Code);
+                    dCmd1.Parameters.AddWithValue("@DisRat", dtTradeDis.Rows[i]["TradeDis"]);
+                    dCmd1.Parameters.AddWithValue("@ProdSl_no", dtTradeDis.Rows[i]["ProdSl_no"]);
+                    
+                    // Change by Devendra Kumar Dated : 12-06-2014
+                    if (TransportBy.Trim() == "LC") // Transportation Landing cost Included.
+                    {
+                        dCmd1.Parameters.AddWithValue("@frtInc", "Y");
+                    }
+                    else {
+                        dCmd1.Parameters.AddWithValue("@frtInc", "N");
+                    }
+
+                    dCmd1.ExecuteNonQuery();
+                }
+            }
+            //End
+
+            if (dtSpecification.Rows.Count > 0)
+            {
+                for (int i = 0; i < dtSpecification.Rows.Count; i++)
+                {
+                    dCmd1 = new SqlCommand("usp_InsertCustPO_ProdSpecification", conn);
+                    dCmd1.CommandType = CommandType.StoredProcedure;
+                    dCmd1.Transaction = mytrans;
+                    dCmd1.Parameters.AddWithValue("@So_No", SO_Code);
+                    dCmd1.Parameters.AddWithValue("@ProdSl_no", dtSpecification.Rows[i]["ProdSl_no"]);
+                    dCmd1.Parameters.AddWithValue("@ProductSpec_Code", dtSpecification.Rows[i]["ProductSpec_Code"]);
+                    dCmd1.Parameters.AddWithValue("@min", dtSpecification.Rows[i]["minimun"]);
+                    dCmd1.Parameters.AddWithValue("@max", dtSpecification.Rows[i]["maximum"]);
+
+                    dCmd1.ExecuteNonQuery();
+                }
+            }
+
+            mytrans.Commit();
+            return SO_Code;
+        }
+        catch
+        {
+            mytrans.Rollback();
+            throw;
+
+        }
+        finally
+        {
+            dCmd1.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+ public string Edit_SaleOrderEntry(string SOCode, string custCode, string CustPO_No, string CustPODate,string CustPOExpDate, string POReceiptDt, string CustVATNo, string CustCSTNo, string Location,
+          string Dispatch_LocCode, double AdvPer, double AdvAmt, string Paymode, int CreditDay, string Expdate, string TransportBy, string AdvanceReceiptNo, string JSStatus,
+          string JSRefNo, string FormType, double PO_Qty, double SubTotal, double VATCSTValue, double Freight_Cost, double DiscountPrice,
+          double POValue, string AmtlnWord, string Product_Code, string Remark, string BillingAddress, string DeliveryAddress, string TermCond, DataTable dtAttachCopy, string AddBy,
+          DataTable dtProductDtl, DataTable dtSpecification, string PORecMode)
+ {
+     SqlConnection conn = new SqlConnection(connStr);
+     conn.Open();
+     mytrans = conn.BeginTransaction();
+     SqlCommand dCmd1 = null;
+     System.Data.SqlTypes.SqlBinary attached;
+     attached = SqlBinary.Null;
+     System.Data.SqlTypes.SqlDateTime _time;
+     _time = SqlDateTime.Null;
+     System.Data.SqlTypes.SqlString _str;
+     _str = SqlString.Null;
+
+     System.Data.SqlTypes.SqlInt32 _int;
+     _int = SqlInt32.Null;
+     try{
+       dCmd1.Parameters.AddWithValue("@Location", Location);
+         dCmd1.Parameters.AddWithValue("@Dispatch_LocCode", Dispatch_LocCode);
+         dCmd1.Parameters.AddWithValue("@AdvPer", AdvPer);
+         dCmd1.Parameters.AddWithValue("@AdvAmt", AdvAmt);
+         dCmd1.Parameters.AddWithValue("@Paymode", Paymode);
+         dCmd1.Parameters.AddWithValue("@CreditDay", CreditDay);
+
+         if (Expdate != "")
+         {
+             dCmd1.Parameters.AddWithValue("@Expdate", Expdate);
+         }
+         else { dCmd1.Parameters.AddWithValue("@Expdate", _time); }
+
+         dCmd1.Parameters.AddWithValue("@TransportBy", TransportBy);
+
+         dCmd1.Parameters.AddWithValue("@AdvanceReceiptNo", _str);
+
+         dCmd1.Parameters.AddWithValue("@JSStatus", JSStatus);
+         if (JSRefNo != "")
+         {
+             dCmd1.Parameters.AddWithValue("@JSRefNo", JSRefNo);
+         }
+         else
+         {
+             dCmd1.Parameters.AddWithValue("@JSRefNo", _str);
+         }
+         dCmd1.Parameters.AddWithValue("@FormType", FormType);
+         dCmd1.Parameters.AddWithValue("@PO_Qty", PO_Qty);
+         dCmd1.Parameters.AddWithValue("@SubTotal", SubTotal);
+         dCmd1.Parameters.AddWithValue("@VATCSTValue", VATCSTValue);
+         dCmd1.Parameters.AddWithValue("@Freight_Cost", Freight_Cost);
+         dCmd1.Parameters.AddWithValue("@DiscountPrice", DiscountPrice);
+         dCmd1.Parameters.AddWithValue("@POValue", POValue);
+         dCmd1.Parameters.AddWithValue("@AmtlnWord", AmtlnWord);
+         dCmd1.Parameters.AddWithValue("@Product_Code", Product_Code);
+         dCmd1.Parameters.AddWithValue("@Remark", Remark);
+         dCmd1.Parameters.AddWithValue("@BillingAddress", BillingAddress);
+         dCmd1.Parameters.AddWithValue("@DeliveryAddress", DeliveryAddress);
+         dCmd1.Parameters.AddWithValue("@TermCond", TermCond);
+
+         dCmd1.Parameters.AddWithValue("@AddBy", AddBy);
+         dCmd1.Parameters.AddWithValue("@PORecMode", PORecMode);
+
+         dCmd1.ExecuteNonQuery();
+
+
+         if (dtAttachCopy.Rows.Count > 0 && SOCode != null)
+         {
+             for (int i = 0; i < dtAttachCopy.Rows.Count; i++)
+             {
+                 dCmd1 = new SqlCommand("usp_InsertPO_Attach_details", conn);
+                 dCmd1.CommandType = CommandType.StoredProcedure;
+                 dCmd1.Transaction = mytrans;
+                 dCmd1.Parameters.AddWithValue("@So_No", SOCode);
+                 dCmd1.Parameters.AddWithValue("@AttachPOCopy", dtAttachCopy.Rows[i]["AttachPOCopy"]);
+                 dCmd1.ExecuteNonQuery();
+             }
+         }
+
+         for (int i = 0; i < dtProductDtl.Rows.Count; i++)
+         {
+             dCmd1 = new SqlCommand("usp_InsertCustPO_ProdDtl", conn);
+             dCmd1.CommandType = CommandType.StoredProcedure;
+             dCmd1.Transaction = mytrans;
+             dCmd1.Parameters.AddWithValue("@So_No", SOCode);
+             dCmd1.Parameters.AddWithValue("@ProdSl_no", dtProductDtl.Rows[i]["ProdSl_no"]);
+             dCmd1.Parameters.AddWithValue("@ProductType_Code", dtProductDtl.Rows[i]["ProductType_Code"]);
+             dCmd1.Parameters.AddWithValue("@ProductGrade_Code", dtProductDtl.Rows[i]["ProductGrade_Code"]);
+             if (dtProductDtl.Rows[i]["ProductSize_Code"].ToString() != "0")
+             {
+                 dCmd1.Parameters.AddWithValue("@ProductSize_Code", dtProductDtl.Rows[i]["ProductSize_Code"]);
+             }
+             else
+             {
+                 dCmd1.Parameters.AddWithValue("@ProductSize_Code", _int);
+             }
+             dCmd1.Parameters.AddWithValue("@Qty", dtProductDtl.Rows[i]["Qty"]);
+             dCmd1.Parameters.AddWithValue("@RatePerTon", dtProductDtl.Rows[i]["RatePerTon"]);
+             dCmd1.Parameters.AddWithValue("@TotalVal", dtProductDtl.Rows[i]["TotalVal"]);
+             dCmd1.Parameters.AddWithValue("@VATCSTPer", dtProductDtl.Rows[i]["VATCSTPer"]);
+             //----- ADDED BY : ASHISH KALSARPE --- DATE : 23/01/2022-----
+             dCmd1.Parameters.AddWithValue("@CGSTPer", dtProductDtl.Rows[i]["CGSTPer"]);
+             dCmd1.Parameters.AddWithValue("@SGSTPer", dtProductDtl.Rows[i]["SGSTPer"]);
+             //---------------- ASHISH END--------------------------------
+             dCmd1.Parameters.AddWithValue("@VATCSTValue", dtProductDtl.Rows[i]["VATCSTValue"]);
+             dCmd1.Parameters.AddWithValue("@Freight_Cost", dtProductDtl.Rows[i]["Freight_Cost"]);
+             dCmd1.Parameters.AddWithValue("@OverallValue", dtProductDtl.Rows[i]["OverallValue"]);
+             dCmd1.Parameters.AddWithValue("@DiscountPrice", dtProductDtl.Rows[i]["DiscountPrice"]);
+             dCmd1.Parameters.AddWithValue("@DiscountQty", dtProductDtl.Rows[i]["DiscountQty"]);
+             //----- ADDED BY : ASHISH KALSARPE --- DATE : 09/05/2022-----
+             dCmd1.Parameters.AddWithValue("@Base_Rate", dtProductDtl.Rows[i]["Base_Rate"]);
+             dCmd1.Parameters.AddWithValue("@Royalty", dtProductDtl.Rows[i]["Royalty"]);
+             dCmd1.Parameters.AddWithValue("@Logistic_Cost", dtProductDtl.Rows[i]["Logistic_Cost"]);
+             dCmd1.Parameters.AddWithValue("@Other", dtProductDtl.Rows[i]["Other"]);
+             dCmd1.Parameters.AddWithValue("@Trade_Disc", dtProductDtl.Rows[i]["Trade_Disc"]);
+             //---------------- ASHISH END--------------------------------
+             dCmd1.ExecuteNonQuery();
+         }
+
+         if (dtSpecification.Rows.Count > 0)
+         {
+             for (int i = 0; i < dtSpecification.Rows.Count; i++)
+             {
+                 dCmd1 = new SqlCommand("usp_InsertCustPO_ProdSpecification", conn);
+                 dCmd1.CommandType = CommandType.StoredProcedure;
+                 dCmd1.Transaction = mytrans;
+                 dCmd1.Parameters.AddWithValue("@So_No", SOCode);
+                 dCmd1.Parameters.AddWithValue("@ProdSl_no", dtSpecification.Rows[i]["ProdSl_no"]);
+                 dCmd1.Parameters.AddWithValue("@ProductSpec_Code", dtSpecification.Rows[i]["ProductSpec_Code"]);
+                 dCmd1.Parameters.AddWithValue("@min", dtSpecification.Rows[i]["minimun"]);
+                 dCmd1.Parameters.AddWithValue("@max", dtSpecification.Rows[i]["maximum"]);
+
+                 dCmd1.ExecuteNonQuery();
+             }
+         }
+
+         mytrans.Commit();
+         return SOCode;
+     }
+     catch
+     {
+         mytrans.Rollback();
+         throw;
+
+     }
+     finally
+     {
+         dCmd1.Dispose();
+         conn.Close();
+         conn.Dispose();
+     }
+ }
+
+
+
+
+    public DataTable SelectSaleOrder(string SO_No)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("usp_SelectSO", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            dAd.SelectCommand.Parameters.AddWithValue("@SO_No", SO_No);
+            dAd.Fill(dSet, "tbl_SelectSO");
+            return dSet.Tables["tbl_SelectSO"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    public DataTable SearchCustomerSoEntry(string fromdate, string todate, string custname, string custcode, string sono, string sodate, int level)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("usp_SearchCustomerSoEntry", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            dAd.SelectCommand.Parameters.AddWithValue("@fromdate", fromdate);
+            dAd.SelectCommand.Parameters.AddWithValue("@todate", todate);
+            dAd.SelectCommand.Parameters.AddWithValue("@Custname", custname);
+            dAd.SelectCommand.Parameters.AddWithValue("@custcode", custcode);
+            dAd.SelectCommand.Parameters.AddWithValue("@So_No", sono);
+            dAd.SelectCommand.Parameters.AddWithValue("@So_Date", sodate);
+            dAd.SelectCommand.Parameters.AddWithValue("@Level", level);
+            dAd.SelectCommand.Parameters.AddWithValue("@emp", HttpContext.Current.Session["LogIn_Code"].ToString());
+            dAd.Fill(dSet, "tbl_SearchCustomerSoEntry");
+            return dSet.Tables["tbl_SearchCustomerSoEntry"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    //--------------------- Added Date : 21-02-2012 ---------------------------//
+    //--------------------- Added By: Devendra Kumar --------------------------//
+
+    public DataTable Select_CustPOStatus(string So_No, string Remarks, string Location, string Date,
+        string CustCode, string PONO, string FilterType)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("usp_POStatus", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            dAd.SelectCommand.Parameters.AddWithValue("@So_No", So_No);
+            dAd.SelectCommand.Parameters.AddWithValue("@Remarks", Remarks);
+            dAd.SelectCommand.Parameters.AddWithValue("@Location", Location);
+            dAd.SelectCommand.Parameters.AddWithValue("@Date", Date);
+            dAd.SelectCommand.Parameters.AddWithValue("@CustCode", CustCode);
+            dAd.SelectCommand.Parameters.AddWithValue("@PONO", PONO);
+            dAd.SelectCommand.Parameters.AddWithValue("@FilterType", FilterType);
+
+            dAd.Fill(dSet, "tbl_POStatus");
+            return dSet.Tables["tbl_POStatus"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    public DataSet CustomerPurchasePODetails(string So_No)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("usp_CustomerPurchasePODetails", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            //dAd.SelectCommand.Parameters.AddWithValue("@FromDate", fromdate);
+            dAd.SelectCommand.Parameters.AddWithValue("@So_no", So_No);
+            dAd.Fill(dSet, "tbl_StockStatus");
+            return dSet;
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    //--------------------- Added Date : 24-04-2012 ---------------------------//
+    //--------------------- Added By: Vinay Kathera --------------------------//
+
+    public int Insert_POAttachment(string So_No, byte[] AttachPOCopy)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        conn.Open();
+        mytrans = conn.BeginTransaction();
+        SqlCommand dCmd1 = null;
+        try
+        {
+            dCmd1 = new SqlCommand("usp_InsertPO_Attach_details", conn);
+            dCmd1.CommandType = CommandType.StoredProcedure;
+            dCmd1.Transaction = mytrans;
+            dCmd1.Parameters.AddWithValue("@So_No", So_No);
+            dCmd1.Parameters.AddWithValue("@AttachPOCopy", AttachPOCopy);
+            mytrans.Commit();
+            return dCmd1.ExecuteNonQuery();
+        }
+        catch
+        {
+            mytrans.Rollback();
+            throw;
+        }
+        finally
+        {
+            dCmd1.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    public DataTable SelectPONo_Attach(string So_No)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("usp_SelectPONo_Attach", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            //dAd.SelectCommand.Parameters.AddWithValue("@FromDate", fromdate);
+            dAd.SelectCommand.Parameters.AddWithValue("@So_No", So_No);
+            dAd.SelectCommand.Parameters.AddWithValue("@Employee_Code", HttpContext.Current.Session["LogIn_Code"].ToString());
+            dAd.Fill(dSet, "tbl_PONo_Attach");
+            return dSet.Tables["tbl_PONo_Attach"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    public DataTable ShowGridPONo_Attach(string So_No, string Sl_No)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("usp_ShowGridPONo_Attach", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            //dAd.SelectCommand.Parameters.AddWithValue("@FromDate", fromdate);
+            dAd.SelectCommand.Parameters.AddWithValue("@So_No", So_No);
+            dAd.SelectCommand.Parameters.AddWithValue("@Sl_No", Sl_No);
+            dAd.Fill(dSet, "tbl_PONo_Attach");
+            return dSet.Tables["tbl_PONo_Attach"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    public int DeletePONo_Attach(string So_No, int Sl_No)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        conn.Open();
+        SqlCommand dCmd = new SqlCommand("usp_DeletePONo_Attach", conn);
+        dCmd.CommandType = CommandType.StoredProcedure;
+        try
+        {
+            dCmd.Parameters.AddWithValue("@So_No", So_No);
+            dCmd.Parameters.AddWithValue("@Sl_No", Sl_No);
+            return dCmd.ExecuteNonQuery();
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dCmd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    //---- Added By    : Ashish Kalsarpe -- Date : 11/10/2022---
+    //---- Description : GET PO List For PO Quantity update.
+
+    public DataTable GETPONo_LIST(string loc, string custcode, int requestFor)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("Usp_Select_ApprovedCustPO", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+
+            dAd.SelectCommand.Parameters.AddWithValue("@loc", loc);
+            dAd.SelectCommand.Parameters.AddWithValue("@custCode", custcode);
+            dAd.SelectCommand.Parameters.AddWithValue("@requestFor", requestFor);
+
+            
+            dAd.Fill(dSet, "tbl_PONo_List");
+            return dSet.Tables["tbl_PONo_List"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    public DataTable GETPONo_Product_Detail( string SO_NO)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        SqlDataAdapter dAd = new SqlDataAdapter("Usp_Select_POProduct_Dtls", conn);
+        dAd.SelectCommand.CommandType = CommandType.StoredProcedure;
+        DataSet dSet = new DataSet();
+        try
+        {
+            dAd.SelectCommand.Parameters.AddWithValue("@So_No", SO_NO);          
+            dAd.Fill(dSet, "tbl_POProduct_Dtl");
+            return dSet.Tables["tbl_POProduct_Dtl"];
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            dSet.Dispose();
+            dAd.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+    //---- Added By    : Ashish Kalsarpe --- Date : 12/10/2022 ---
+    //---- Description : Customer purchase order Quantity Increase.
+    public decimal Update_POProduct_Quantity(DataTable dtProductDtl, string SO_NO, string reason, string employee_code)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        conn.Open();
+        mytrans = conn.BeginTransaction();
+        SqlCommand dCmd1 = null;
+        System.Data.SqlTypes.SqlBinary attached;
+        attached = SqlBinary.Null;
+        System.Data.SqlTypes.SqlDateTime _time;
+        _time = SqlDateTime.Null;
+        System.Data.SqlTypes.SqlString _str;
+        _str = SqlString.Null;
+        System.Data.SqlTypes.SqlInt32 _int;
+        _int = SqlInt32.Null;
+        decimal count = 0;
+        decimal logid = 0;
+        try
+        {
+
+            for (int i = 0; i < dtProductDtl.Rows.Count; i++)
+            {
+                if (Convert.ToDecimal(dtProductDtl.Rows[i]["IncreaseQty"]) > 0)
+                {
+                    dCmd1 = new SqlCommand("Usp_Update_CustPO_ProdDtl_Qty", conn);
+                    dCmd1.CommandType = CommandType.StoredProcedure;
+                    dCmd1.Transaction = mytrans;
+
+                    SqlParameter sqlp = new SqlParameter();
+                    sqlp = dCmd1.Parameters.Add("@CountRows", SqlDbType.Decimal);
+                    sqlp.Direction = ParameterDirection.Output;
+                    dCmd1.Parameters.AddWithValue("@So_No", Convert.ToString(dtProductDtl.Rows[i]["So_No"]));
+                    dCmd1.Parameters.AddWithValue("@ProdSl_no", Convert.ToInt32(dtProductDtl.Rows[i]["ProdSl_no"]));
+                    dCmd1.Parameters.AddWithValue("@ProductType_Code", Convert.ToInt32(dtProductDtl.Rows[i]["ProductType_Code"]));
+                    dCmd1.Parameters.AddWithValue("@ProductGrade_Code", Convert.ToInt32(dtProductDtl.Rows[i]["ProductGrade_Code"]));
+                    dCmd1.Parameters.AddWithValue("@ProductSize_Code", Convert.ToInt32(dtProductDtl.Rows[i]["ProductSize_Code"]));
+                    dCmd1.Parameters.AddWithValue("@IncreasedQty", Convert.ToDecimal(dtProductDtl.Rows[i]["IncreaseQty"]));
+                    dCmd1.ExecuteNonQuery();
+
+                    count = (decimal)dCmd1.Parameters["@CountRows"].Value;
+                }
+            }
+
+            if (count > 0)
+            {
+                decimal checkUpdate = 0;
+                dCmd1 = new SqlCommand("Usp_Update_CustPO_Qty", conn);
+                dCmd1.CommandType = CommandType.StoredProcedure;
+                dCmd1.Transaction = mytrans;
+
+
+                SqlParameter sqlp1 = new SqlParameter();
+                sqlp1 = dCmd1.Parameters.Add("@count", SqlDbType.Decimal);
+                sqlp1.Direction = ParameterDirection.Output;
+
+                dCmd1.Parameters.AddWithValue("@SO_NO", SO_NO);
+                dCmd1.ExecuteNonQuery();
+                checkUpdate = (decimal)dCmd1.Parameters["@count"].Value;
+
+                if (checkUpdate > 0)
+                {
+                    count = checkUpdate;
+                }
+            }
+            if (count > 0)
+            {
+
+
+                for (int i = 0; i < dtProductDtl.Rows.Count; i++)
+                {
+                    if (Convert.ToDecimal(dtProductDtl.Rows[i]["IncreaseQty"]) > 0)
+                    {
+                        dCmd1 = new SqlCommand("Usp_Insert_CustPO_Prod_Quantity_Log", conn);
+                        dCmd1.CommandType = CommandType.StoredProcedure;
+                        dCmd1.Transaction = mytrans;
+
+                        SqlParameter sqlp = new SqlParameter();
+                        sqlp = dCmd1.Parameters.Add("@SOQL_ID", SqlDbType.Decimal);
+                        sqlp.Direction = ParameterDirection.Output;
+                        dCmd1.Parameters.AddWithValue("@SO_No", Convert.ToString(dtProductDtl.Rows[i]["So_No"]));
+                        dCmd1.Parameters.AddWithValue("@ProdSl_no", Convert.ToInt32(dtProductDtl.Rows[i]["ProdSl_no"]));
+                        dCmd1.Parameters.AddWithValue("@ProductType_Code", Convert.ToInt32(dtProductDtl.Rows[i]["ProductType_Code"]));
+                        dCmd1.Parameters.AddWithValue("@ProductGrade_Code", Convert.ToInt32(dtProductDtl.Rows[i]["ProductGrade_Code"]));
+                        dCmd1.Parameters.AddWithValue("@ProductSize_Code", Convert.ToInt32(dtProductDtl.Rows[i]["ProductSize_Code"]));
+                        dCmd1.Parameters.AddWithValue("@IncreaseQty", Convert.ToDecimal(dtProductDtl.Rows[i]["IncreaseQty"]));
+                        dCmd1.Parameters.AddWithValue("@PreviousQty", Convert.ToDecimal(dtProductDtl.Rows[i]["PreviousQty"]));
+                        if (reason != null)
+                        {
+                            dCmd1.Parameters.AddWithValue("@Remarks", reason);
+                        }
+                        else
+                        {
+                            dCmd1.Parameters.AddWithValue("@Remarks", DBNull.Value);
+                        }
+                        dCmd1.Parameters.AddWithValue("@AddBy", employee_code);
+                        dCmd1.ExecuteNonQuery();
+
+                        logid = (decimal)dCmd1.Parameters["@SOQL_ID"].Value;
+                        count = logid;
+                        if (logid < 0) { break; }
+                    }
+                }
+
+
+                if (count > 0)
+                {
+                    mytrans.Commit();
+                }
+                else
+                {
+                    mytrans.Rollback();
+                }
+            }
+            else
+            {
+                mytrans.Rollback();
+            }
+            return count;
+        }
+        catch
+        {
+            mytrans.Rollback();
+            throw;
+
+        }
+        finally
+        {
+            dCmd1.Dispose();
+            conn.Close();
+            conn.Dispose();
+        }
+    }
+
+
+    /*-------------------------------------------------------------------------------*/
+
+    public decimal Update_PO_ExpiryDate(string SO_NO, string reason, string employee_code, string prev_PO_ExpDate, string new_PO_ExpDate,int request_for)
+    {
+        SqlConnection conn = new SqlConnection(connStr);
+        conn.Open();
+        mytrans = conn.BeginTransaction();
+        SqlCommand dCmd1 = null;
+        System.Data.SqlTypes.SqlBinary attached;
+        attached = SqlBinary.Null;
+        System.Data.SqlTypes.SqlDateTime _time;
+        _time = SqlDateTime.Null;
+        System.Data.SqlTypes.SqlString _str;
+        _str = SqlString.Null;
+        System.Data.SqlTypes.SqlInt32 _int;
+        _int = SqlInt32.Null;
+        decimal count = 0;
+        decimal logid = 0;
+        try
+        {
+
+        dCmd1 = new SqlCommand("Usp_Update_PO_Expiry", conn);
+        dCmd1.CommandType = CommandType.StoredProcedure;
+        dCmd1.Transaction = mytrans;
+        SqlParameter sqlp1 = new SqlParameter();
+        sqlp1 = dCmd1.Parameters.Add("@CountRows", SqlDbType.Decimal);
+        sqlp1.Direction = ParameterDirection.Output;
+        dCmd1.Parameters.AddWithValue("@SO_NO", SO_NO);
+        dCmd1.Parameters.AddWithValue("@CustPOExpDate", new_PO_ExpDate);       
+        dCmd1.ExecuteNonQuery();
+        count = (decimal)dCmd1.Parameters["@CountRows"].Value;
+        
+        if(count>0)
+        {
+            dCmd1 = new SqlCommand("Usp_Insert_CustPO_Prod_Quantity_Log", conn);
+            dCmd1.CommandType = CommandType.StoredProcedure;
+            dCmd1.Transaction = mytrans;
+
+            SqlParameter sqlp = new SqlParameter();
+            sqlp = dCmd1.Parameters.Add("@SOQL_ID", SqlDbType.Decimal);
+            sqlp.Direction = ParameterDirection.Output;
+            dCmd1.Parameters.AddWithValue("@SO_No", SO_NO);
+            dCmd1.Parameters.AddWithValue("@ProdSl_no", DBNull.Value);
+            dCmd1.Parameters.AddWithValue("@ProductType_Code",DBNull.Value);
+            dCmd1.Parameters.AddWithValue("@ProductGrade_Code", DBNull.Value);
+            dCmd1.Parameters.AddWithValue("@ProductSize_Code", DBNull.Value);
+            dCmd1.Parameters.AddWithValue("@IncreaseQty", DBNull.Value);
+            dCmd1.Parameters.AddWithValue("@PreviousQty", DBNull.Value);
+            dCmd1.Parameters.AddWithValue("@Request_For", request_for);
+            dCmd1.Parameters.AddWithValue("@PreviousExpiryDate",prev_PO_ExpDate);
+            dCmd1.Parameters.AddWithValue("@NewExpiryDate", new_PO_ExpDate);
+            if (reason != null)
+            {
+            dCmd1.Parameters.AddWithValue("@Remarks", reason);
+            }
+            else
+            {
+            dCmd1.Parameters.AddWithValue("@Remarks", DBNull.Value);
+            }
+            dCmd1.Parameters.AddWithValue("@AddBy", employee_code);
+            dCmd1.ExecuteNonQuery();
+
+            logid = (decimal)dCmd1.Parameters["@SOQL_ID"].Value;
+            count = logid;
+
+           }
+
+
+            if (count > 0)
+            {
+             mytrans.Commit();
+            }
+            else
+            {
+              mytrans.Rollback();
+            }
+           
+            return count;
+        } 
+        catch
+            {
+            mytrans.Rollback();
+            throw;
+
+            }
+            finally
+            {
+                dCmd1.Dispose();
+                conn.Close();
+                conn.Dispose();
+            }
+    }
+
+}
+
+/*-------------------------------------------------------------------------------------*/
+
+
+
+
+
+------------------------------------------------------------------------BALSGX_Customer_PO_Entry.cs---------------------------------------------------------------------
+
+
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+using System.Data.SqlClient;
+using System.Data;
+
+public class BALSGX_CustomerPOEntry
+{
+    public BALSGX_CustomerPOEntry()
+    {
+       
+    }
+    public string Insert_SaleOrderEntry(string custCode, string CustPO_No, string CustPODate,string CustPOExpDate, string POReceiptDt, string CustVATNo, string CustCSTNo, string Location,
+                 string Dispatch_LocCode, double AdvPer, double AdvAmt, string Paymode, int CreditDay, string Expdate, string TransportBy, string AdvanceReceiptNo, string JSStatus,
+                 string JSRefNo, string FormType, double PO_Qty, double SubTotal, double VATCSTValue, double Freight_Cost, double DiscountPrice,
+                 double POValue, string AmtlnWord, string Product_Code, string Remark, string BillingAddress, string DeliveryAddress, int BillingAddress_state, int DeliveryAddress_state, string DeliveryAddress_GSTIN, string TermCond, DataTable dtAttachCopy, string AddBy,string PORecMode,
+                 DataTable dtProductDtl, DataTable dtSpecification, DataTable dtTradeDis,decimal DeliveryDist)
+    {
+
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.Insert_SaleOrderEntry(custCode, CustPO_No, CustPODate,CustPOExpDate, POReceiptDt, CustVATNo, CustCSTNo, Location, Dispatch_LocCode,
+            AdvPer, AdvAmt, Paymode, CreditDay, Expdate, TransportBy, AdvanceReceiptNo, JSStatus, JSRefNo, FormType, 
+            PO_Qty, SubTotal, VATCSTValue, Freight_Cost, DiscountPrice,
+            POValue, AmtlnWord, Product_Code, Remark, BillingAddress, DeliveryAddress, BillingAddress_state, DeliveryAddress_state, DeliveryAddress_GSTIN, TermCond,
+            dtAttachCopy, AddBy, PORecMode, dtProductDtl, dtSpecification, dtTradeDis, DeliveryDist);
+
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    public string Edit_SaleOrderEntry(string SOCode, string custCode, string CustPO_No, string CustPODate,string CustPOExpDate, string POReceiptDt, string CustVATNo, string CustCSTNo, string Location,
+                string Dispatch_LocCode, double AdvPer, double AdvAmt, string Paymode, int CreditDay, string Expdate, string TransportBy, string AdvanceReceiptNo, string JSStatus,
+                string JSRefNo, string FormType, double PO_Qty, double SubTotal, double VATCSTValue, double Freight_Cost, double DiscountPrice,
+                double POValue, string AmtlnWord, string Product_Code, string Remark, string BillingAddress, string DeliveryAddress, string TermCond, DataTable dtAttachCopy, string AddBy,
+                DataTable dtProductDtl, DataTable dtSpecification, string PORecMode)
+    {
+
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.Edit_SaleOrderEntry(SOCode, custCode, CustPO_No, CustPODate,CustPOExpDate, POReceiptDt, CustVATNo, CustCSTNo, Location, Dispatch_LocCode,
+            AdvPer, AdvAmt, Paymode, CreditDay, Expdate, TransportBy, AdvanceReceiptNo, JSStatus, JSRefNo, FormType,
+            PO_Qty, SubTotal, VATCSTValue, Freight_Cost, DiscountPrice,
+            POValue, AmtlnWord, Product_Code, Remark, BillingAddress, DeliveryAddress, TermCond,
+            dtAttachCopy, AddBy, dtProductDtl, dtSpecification, PORecMode);
+
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    public DataTable SelectSaleOrder(string SO_No)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.SelectSaleOrder(SO_No);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    public DataTable SearchCustomerSoEntry(string fromdate, string todate, string custname, string custcode, string sono, string sodate, int level)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.SearchCustomerSoEntry(fromdate, todate, custname, custcode, sono, sodate, level);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    //--------------------- Added Date : 21-02-2012 ---------------------------//
+    //--------------------- Added By: Devendra Kumar --------------------------//
+   
+    public DataTable Select_CustPOStatus(string So_No, string Remarks, string Location, string Date,
+                        string CustCode, string PONO, string FilterType)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.Select_CustPOStatus(So_No, Remarks, Location, Date, CustCode, PONO, FilterType);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    public DataSet CustomerPurchasePODetails(string So_No)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.CustomerPurchasePODetails(So_No);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+
+    //--------------------- Added Date : 24-04-2012 ---------------------------//
+    //--------------------- Added By: Vinay Kathera --------------------------//
+
+    public int Insert_POAttachment(string So_No, byte[] AttachPOCopy)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.Insert_POAttachment(So_No, AttachPOCopy);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+    public DataTable SelectPONo_Attach(string So_No)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.SelectPONo_Attach(So_No);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+    public DataTable ShowGridPONo_Attach(string So_No, string Sl_No)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.ShowGridPONo_Attach(So_No, Sl_No);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+    public int DeletePONo_Attach(string So_No, int Sl_No)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.DeletePONo_Attach(So_No, Sl_No);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+
+    //---- Added By    : Ashish Kalsarpe -- Date : 11/10/2022---
+    //---- Description : GET PO List For PO Quantity update.
+
+    public DataTable GETPONo_LIST(string loc, string custcode,int requestFor)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.GETPONo_LIST(loc, custcode, requestFor);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    public DataTable GETPONo_Product_Detail(string SO_NO)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.GETPONo_Product_Detail(SO_NO);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+    //---- Added By    : Ashish Kalsarpe --- Date : 12/10/2022 ---
+    //---- Description : Customer purchase order Quantity Increase.
+    public decimal Update_POProduct_Quantity(DataTable dtProductDtl, string SO_NO, string reason, string employee_code)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.Update_POProduct_Quantity(dtProductDtl,SO_NO, reason,employee_code);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+  /*---------------------------------------------------------------------*/
+
+    public decimal Update_PO_ExpiryDate(string SO_NO, string reason, string employee_code, string prev_PO_ExpDate, string new_PO_ExpDate, int request_for)
+    {
+        DALSGX_CustomerPOEntry CustomerPOEntry = new DALSGX_CustomerPOEntry();
+        try
+        {
+            return CustomerPOEntry.Update_PO_ExpiryDate(SO_NO, reason, employee_code, prev_PO_ExpDate, new_PO_ExpDate, request_for);
+        }
+        catch
+        {
+            throw;
+        }
+        finally
+        {
+            CustomerPOEntry = null;
+        }
+    }
+
+}
+
+ /*------------------------------------------------------------------------*/
